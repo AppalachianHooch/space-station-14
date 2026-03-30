@@ -98,4 +98,10 @@ public sealed partial class ProjectileComponent : Component
     /// </summary>
     [DataField]
     public FixedPoint2 PenetrationAmount = FixedPoint2.Zero;
+
+    /// <summary>
+    ///     Impulse applied to the hit entity in the projectile's travel direction.
+    /// </summary>
+    [DataField]
+    public float Knockback = 0f;
 }

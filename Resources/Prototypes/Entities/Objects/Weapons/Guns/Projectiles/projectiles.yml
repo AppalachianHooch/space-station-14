@@ -72,6 +72,8 @@
           !type:PhysShapeAabb
           bounds: "-0.1,-0.10,0.1,0.30"
         hard: false
+        layer:
+        - BulletImpassable
         mask:
         - Impassable
         - BulletImpassable
@@ -86,6 +88,7 @@
         hard: False
   - type: Projectile
     impactEffect: BulletImpactEffect
+    knockback: 200
     damage:
       types:
         Piercing: 14
