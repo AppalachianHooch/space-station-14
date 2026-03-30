@@ -10,6 +10,7 @@ using Content.Shared.Database;
 using Content.Shared.FixedPoint;
 using Content.Shared.Projectiles;
 using Robust.Shared.Physics.Events;
+using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
 
 namespace Content.Server.Projectiles;
@@ -21,6 +22,7 @@ public sealed class ProjectileSystem : SharedProjectileSystem
     [Dependency] private readonly DamageableSystem _damageableSystem = default!;
     [Dependency] private readonly DestructibleSystem _destructibleSystem = default!;
     [Dependency] private readonly GunSystem _guns = default!;
+    [Dependency] private readonly SharedPhysicsSystem _physics = default!;
     [Dependency] private readonly SharedCameraRecoilSystem _sharedCameraRecoil = default!;
 
     public override void Initialize()
@@ -32,7 +34,7 @@ public sealed class ProjectileSystem : SharedProjectileSystem
     private void OnStartCollide(EntityUid uid, ProjectileComponent component, ref StartCollideEvent args)
     {
         // This is so entities that shouldn't get a collision are ignored.
-        if (args.OurFixtureId != ProjectileFixture || !args.OtherFixture.Hard
+        if (args.OurFixtureId != ProjectileFixture || (!args.OtherFixture.Hard && !HasComp<ProjectileComponent>(args.OtherEntity))
             || component.ProjectileSpent || component is { Weapon: null, OnlyCollideWhenShot: true })
             return;
 
@@ -83,6 +85,9 @@ public sealed class ProjectileSystem : SharedProjectileSystem
             if (!args.OurBody.LinearVelocity.IsLengthZero())
                 _sharedCameraRecoil.KickCamera(target, args.OurBody.LinearVelocity.Normalized());
         }
+
+        if (component.Knockback > 0f && !args.OurBody.LinearVelocity.IsLengthZero())
+            _physics.ApplyLinearImpulse(target, args.OurBody.LinearVelocity.Normalized() * component.Knockback, body: args.OtherBody);
 
         if (component.DeleteOnCollide && component.ProjectileSpent)
             QueueDel(uid);
