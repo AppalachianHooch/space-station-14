@@ -38,6 +38,12 @@ public sealed class ProjectileSystem : SharedProjectileSystem
             || component.ProjectileSpent || component is { Weapon: null, OnlyCollideWhenShot: true })
             return;
 
+        // Ignore collisions between projectiles fired from the same weapon.
+        if (component.Weapon != null
+            && TryComp<ProjectileComponent>(args.OtherEntity, out var otherProjectile)
+            && otherProjectile.Weapon == component.Weapon)
+            return;
+
         var target = args.OtherEntity;
         // it's here so this check is only done once before possible hit
         var attemptEv = new ProjectileReflectAttemptEvent(uid, component, false);
