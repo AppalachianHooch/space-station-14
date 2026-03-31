@@ -87,7 +87,7 @@ namespace Content.Client.ContextMenu.UI
             if (DrawMode == DrawModeEnum.Hover)
                 return;
 
-            if (_subMenu?.Visible ?? true)
+            if (_subMenu?.Visible ?? false)
                 return;
 
             if (HasStylePseudoClass(StylePseudoClassHover))

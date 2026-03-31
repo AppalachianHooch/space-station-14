@@ -86,6 +86,7 @@ namespace Content.Client.ContextMenu.UI
             _setup = false;
 
             Close();
+            Menus.Clear();
             RootMenu.OnPopupHide -= Close;
             RootMenu.Orphan();
             RootMenu = default!;
@@ -100,6 +101,8 @@ namespace Content.Client.ContextMenu.UI
             CancelOpen?.Cancel();
             CancelClose?.Cancel();
             OnContextClosed?.Invoke();
+            while (Menus.TryPeek(out var top) && top != RootMenu)
+                Menus.Pop();
             RootMenu.Close();
         }
 
