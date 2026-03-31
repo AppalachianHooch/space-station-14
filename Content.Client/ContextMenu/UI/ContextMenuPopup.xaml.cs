@@ -36,7 +36,7 @@ namespace Content.Client.ContextMenu.UI
         private readonly Action<Control> _onMenuBodyChildRemoved;
         private readonly Action _onPopupHide;
 
-        public ContextMenuPopup (ContextMenuUIController uiController, ContextMenuElement? parentElement) : base()
+        public ContextMenuPopup(ContextMenuUIController uiController, ContextMenuElement? parentElement) : base()
         {
             _uiController = uiController;
             _onMenuBodyChildRemoved = ctrl => _uiController.OnRemoveElement(this, ctrl);
