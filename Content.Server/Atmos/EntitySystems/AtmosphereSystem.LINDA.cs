@@ -280,7 +280,12 @@ namespace Content.Server.Atmos.EntitySystems
             var moles = receiver.TotalMoles;
             var theirMoles = sharer.TotalMoles;
 
-            return (tileReceiver.AirArchived.Temperature * (moles + movedMoles)) - (tileSharer.AirArchived.Temperature * (theirMoles - movedMoles)) * Atmospherics.R / receiver.Volume;
+            // Pressure delta from ideal gas law: P = nRT / V.
+            // So, deltaP = ((n1 * T1) - (n2 * T2)) * R / V.
+            // Reference: https://en.wikipedia.org/wiki/Ideal_gas_law
+            return ((tileReceiver.AirArchived.Temperature * (moles + movedMoles)) -
+                    (tileSharer.AirArchived.Temperature * (theirMoles - movedMoles)))
+                   * Atmospherics.R / receiver.Volume;
         }
 
         /// <summary>
