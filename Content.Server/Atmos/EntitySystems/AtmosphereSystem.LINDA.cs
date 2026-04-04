@@ -275,14 +275,13 @@ namespace Content.Server.Atmos.EntitySystems
                 }
             }
 
-            if (!(temperatureDelta > Atmospherics.MinimumTemperatureToMove) &&
+            if (!(MathF.Abs(temperatureDelta) > Atmospherics.MinimumTemperatureToMove) &&
                 !(MathF.Abs(movedMoles) > Atmospherics.MinimumMolesDeltaToMove)) return 0f;
             var moles = receiver.TotalMoles;
             var theirMoles = sharer.TotalMoles;
 
             // Pressure delta from ideal gas law: P = nRT / V.
             // So, deltaP = ((n1 * T1) - (n2 * T2)) * R / V.
-            // Reference: https://en.wikipedia.org/wiki/Ideal_gas_law
             return ((tileReceiver.AirArchived.Temperature * (moles + movedMoles)) -
                     (tileSharer.AirArchived.Temperature * (theirMoles - movedMoles)))
                    * Atmospherics.R / receiver.Volume;
