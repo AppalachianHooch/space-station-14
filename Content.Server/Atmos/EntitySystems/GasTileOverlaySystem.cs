@@ -427,7 +427,11 @@ namespace Content.Server.Atmos.EntitySystems
                     if (old.Count == 0)
                         ChunkIndexPool.Return(old);
                     else
-                        ev.RemovedChunks.Add(netGrid, old);
+                    {
+                        ev.RemovedChunks.Add(netGrid, new HashSet<Vector2i>(old));
+                        old.Clear();
+                        ChunkIndexPool.Return(old);
+                    }
                 }
 
                 foreach (var (netGrid, oldIndices) in staleGrids)
@@ -436,12 +440,10 @@ namespace Content.Server.Atmos.EntitySystems
 
                     // If grid was deleted then don't worry about sending it to the client.
                     if (!EntManager.TryGetEntity(netGrid, out var gridId) || GridQuery.HasComp(gridId.Value))
-                        ev.RemovedChunks[netGrid] = oldIndices;
-                    else
-                    {
-                        oldIndices.Clear();
-                        ChunkIndexPool.Return(oldIndices);
-                    }
+                        ev.RemovedChunks[netGrid] = new HashSet<Vector2i>(oldIndices);
+
+                    oldIndices.Clear();
+                    ChunkIndexPool.Return(oldIndices);
                 }
 
                 foreach (var (netGrid, gridChunks) in chunksInRange)
