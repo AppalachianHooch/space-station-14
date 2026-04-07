@@ -24,11 +24,17 @@ public sealed class AtmosMonitoringConsoleSystem : SharedAtmosMonitoringConsoleS
                 {
                     modifiedChunks = delta.ModifiedChunks;
                     atmosDevices = delta.AtmosDevices;
+                    var toRemove = new List<Vector2i>();
 
                     foreach (var index in component.AtmosPipeChunks.Keys)
                     {
                         if (!delta.AllChunks!.Contains(index))
-                            component.AtmosPipeChunks.Remove(index);
+                            toRemove.Add(index);
+                    }
+
+                    foreach (var index in toRemove)
+                    {
+                        component.AtmosPipeChunks.Remove(index);
                     }
 
                     break;
@@ -38,11 +44,17 @@ public sealed class AtmosMonitoringConsoleSystem : SharedAtmosMonitoringConsoleS
                 {
                     modifiedChunks = state.Chunks;
                     atmosDevices = state.AtmosDevices;
+                    var toRemove = new List<Vector2i>();
 
                     foreach (var index in component.AtmosPipeChunks.Keys)
                     {
                         if (!state.Chunks.ContainsKey(index))
-                            component.AtmosPipeChunks.Remove(index);
+                            toRemove.Add(index);
+                    }
+
+                    foreach (var index in toRemove)
+                    {
+                        component.AtmosPipeChunks.Remove(index);
                     }
 
                     break;

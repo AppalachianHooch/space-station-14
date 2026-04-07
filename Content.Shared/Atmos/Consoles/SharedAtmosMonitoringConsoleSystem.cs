@@ -73,10 +73,16 @@ public abstract class SharedAtmosMonitoringConsoleSystem : EntitySystem
 
         public void ApplyToFullState(AtmosMonitoringConsoleState state)
         {
+            var toRemove = new List<Vector2i>();
             foreach (var key in state.Chunks.Keys)
             {
                 if (!AllChunks!.Contains(key))
-                    state.Chunks.Remove(key);
+                    toRemove.Add(key);
+            }
+
+            foreach (var key in toRemove)
+            {
+                state.Chunks.Remove(key);
             }
 
             foreach (var (index, data) in ModifiedChunks)

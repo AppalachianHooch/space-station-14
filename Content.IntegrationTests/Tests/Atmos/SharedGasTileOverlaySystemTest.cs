@@ -62,6 +62,54 @@ public sealed class GasTileOverlayTemperatureNetworkingTest : AtmosTest
         await CheckForInjectedGas(cOverlay, tileIndices, ThermalByte.TempMinimum + (ThermalByte.TempDegreeResolution * 2));
     }
 
+    [Test]
+    public async Task TestGasOverlayChunkPruneSync()
+    {
+        var gridNetEnt = Server.EntMan.GetNetEntity(ProcessEnt);
+        var cGridEnt = CEntMan.GetEntity(gridNetEnt);
+
+        Assert.That(CEntMan.TryGetComponent<GasTileOverlayComponent>(cGridEnt, out var cOverlay),
+            "Client grid is missing GasTileOverlayComponent");
+
+        var chunkA = new Vector2i(0, 0);
+        var chunkB = new Vector2i(1, 0);
+
+        await Server.WaitPost(() =>
+        {
+            var sOverlay = SEntMan.GetComponent<GasTileOverlayComponent>(ProcessEnt);
+            sOverlay.Chunks[chunkA] = new GasOverlayChunk(chunkA);
+            sOverlay.Chunks[chunkB] = new GasOverlayChunk(chunkB);
+            sOverlay.ForceTick = STiming.CurTick;
+            SEntMan.Dirty(ProcessEnt, sOverlay);
+        });
+
+        await RunTicks(30);
+        await Task.WhenAll(Client.WaitIdleAsync(), Server.WaitIdleAsync());
+
+        await Client.WaitAssertion(() =>
+        {
+            Assert.That(cOverlay.Chunks.ContainsKey(chunkA), Is.True, "Expected chunk A to be present.");
+            Assert.That(cOverlay.Chunks.ContainsKey(chunkB), Is.True, "Expected chunk B to be present.");
+        });
+
+        await Server.WaitPost(() =>
+        {
+            var sOverlay = SEntMan.GetComponent<GasTileOverlayComponent>(ProcessEnt);
+            sOverlay.Chunks.Remove(chunkB);
+            sOverlay.ForceTick = STiming.CurTick;
+            SEntMan.Dirty(ProcessEnt, sOverlay);
+        });
+
+        await RunTicks(30);
+        await Task.WhenAll(Client.WaitIdleAsync(), Server.WaitIdleAsync());
+
+        await Client.WaitAssertion(() =>
+        {
+            Assert.That(cOverlay.Chunks.ContainsKey(chunkA), Is.True, "Expected chunk A to remain present.");
+            Assert.That(cOverlay.Chunks.ContainsKey(chunkB), Is.False, "Expected chunk B to be pruned from client state.");
+        });
+    }
+
     private async Task CheckForInjectedGas(GasTileOverlayComponent overlay, Vector2i indices, float expectedTemp)
     {
         await Client.WaitPost(() =>

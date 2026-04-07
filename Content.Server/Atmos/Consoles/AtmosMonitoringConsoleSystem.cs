@@ -308,10 +308,22 @@ public sealed class AtmosMonitoringConsoleSystem : SharedAtmosMonitoringConsoleS
 
         foreach (var chunk in chunkData.Values)
         {
+            List<AtmosMonitoringConsoleSubnet>? toRemove = null;
             foreach (var key in chunk.AtmosPipeData.Keys)
             {
                 if (key.NetId == args.NetId)
-                    chunk.AtmosPipeData.Remove(key);
+                {
+                    toRemove ??= new();
+                    toRemove.Add(key);
+                }
+            }
+
+            if (toRemove == null)
+                continue;
+
+            foreach (var key in toRemove)
+            {
+                chunk.AtmosPipeData.Remove(key);
             }
         }
     }

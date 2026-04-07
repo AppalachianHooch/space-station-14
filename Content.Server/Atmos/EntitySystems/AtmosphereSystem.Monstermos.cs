@@ -355,7 +355,7 @@ namespace Content.Server.Atmos.EntitySystems
                         continue;
 
                     DebugTools.Assert(otherTile2.AdjacentBits.IsFlagSet(direction.GetOpposite()));
-                    if (otherTile2.Air != null && CompareExchange(otherTile2, tile) == GasCompareResult.NoExchange)
+                    if (otherTile2.Air != null && CompareExchange(otherTile2, otherTile) == GasCompareResult.NoExchange)
                         continue;
 
                     AddActiveTile(gridAtmosphere, otherTile2);

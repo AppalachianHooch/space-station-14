@@ -26,10 +26,16 @@ public sealed class GasTileOverlaySystem : SharedGasTileOverlaySystem
             case GasTileOverlayDeltaState delta:
             {
                 modifiedChunks = delta.ModifiedChunks;
+                var toRemove = new List<Vector2i>();
                 foreach (var index in comp.Chunks.Keys)
                 {
                     if (!delta.AllChunks.Contains(index))
-                        comp.Chunks.Remove(index);
+                        toRemove.Add(index);
+                }
+
+                foreach (var index in toRemove)
+                {
+                    comp.Chunks.Remove(index);
                 }
 
                 break;
@@ -37,10 +43,16 @@ public sealed class GasTileOverlaySystem : SharedGasTileOverlaySystem
             case GasTileOverlayState state:
             {
                 modifiedChunks = state.Chunks;
+                var toRemove = new List<Vector2i>();
                 foreach (var index in comp.Chunks.Keys)
                 {
                     if (!state.Chunks.ContainsKey(index))
-                        comp.Chunks.Remove(index);
+                        toRemove.Add(index);
+                }
+
+                foreach (var index in toRemove)
+                {
+                    comp.Chunks.Remove(index);
                 }
 
                 break;
