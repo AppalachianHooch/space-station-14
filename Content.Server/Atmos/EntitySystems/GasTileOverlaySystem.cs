@@ -406,22 +406,13 @@ namespace Content.Server.Atmos.EntitySystems
 
                 var ev = new GasOverlayUpdateEvent();
 
+                var staleGrids = new List<(NetEntity NetGrid, HashSet<Vector2i> OldIndices)>();
                 foreach (var (netGrid, oldIndices) in previouslySent)
                 {
                     // Mark the whole grid as stale and flag for removal.
                     if (!chunksInRange.TryGetValue(netGrid, out var chunks))
                     {
-                        previouslySent.Remove(netGrid);
-
-                        // If grid was deleted then don't worry about sending it to the client.
-                        if (!EntManager.TryGetEntity(netGrid, out var gridId) || GridQuery.HasComp(gridId.Value))
-                            ev.RemovedChunks[netGrid] = oldIndices;
-                        else
-                        {
-                            oldIndices.Clear();
-                            ChunkIndexPool.Return(oldIndices);
-                        }
-
+                        staleGrids.Add((netGrid, oldIndices));
                         continue;
                     }
 
@@ -437,6 +428,20 @@ namespace Content.Server.Atmos.EntitySystems
                         ChunkIndexPool.Return(old);
                     else
                         ev.RemovedChunks.Add(netGrid, old);
+                }
+
+                foreach (var (netGrid, oldIndices) in staleGrids)
+                {
+                    previouslySent.Remove(netGrid);
+
+                    // If grid was deleted then don't worry about sending it to the client.
+                    if (!EntManager.TryGetEntity(netGrid, out var gridId) || GridQuery.HasComp(gridId.Value))
+                        ev.RemovedChunks[netGrid] = oldIndices;
+                    else
+                    {
+                        oldIndices.Clear();
+                        ChunkIndexPool.Return(oldIndices);
+                    }
                 }
 
                 foreach (var (netGrid, gridChunks) in chunksInRange)
